@@ -3,6 +3,11 @@
  *
  * DESCRIPTION: Membership protocol run by this Node.
  * 				Header file of MP1Node class.
+ *
+ * 	Justin Tumale
+ * 	Coursera Cloud Computing 1
+ * 	Membership Protocol Assignment
+ * 	3/25/2017
  **********************************/
 
 #ifndef _MP1NODE_H_
@@ -31,6 +36,8 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
+    HEARTBEATREQ,
+    HEARTBEATREP,
     DUMMYLASTMSGTYPE
 };
 
@@ -40,7 +47,7 @@ enum MsgTypes{
  * DESCRIPTION: Header and content of a message
  */
 typedef struct MessageHdr {
-	enum MsgTypes msgType;
+    enum MsgTypes msgType;
 }MessageHdr;
 
 /**
@@ -50,32 +57,49 @@ typedef struct MessageHdr {
  */
 class MP1Node {
 private:
-	EmulNet *emulNet;
-	Log *log;
-	Params *par;
-	Member *memberNode;
-	char NULLADDR[6];
+    EmulNet *emulNet;
+    Log *log;
+    Params *par;
+    Member *memberNode;
+    char NULLADDR[6];
 
 public:
-	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
-	Member * getMemberNode() {
-		return memberNode;
-	}
-	int recvLoop();
-	static int enqueueWrapper(void *env, char *buff, int size);
-	void nodeStart(char *servaddrstr, short serverport);
-	int initThisNode(Address *joinaddr);
-	int introduceSelfToGroup(Address *joinAddress);
-	int finishUpThisNode();
-	void nodeLoop();
-	void checkMessages();
-	bool recvCallBack(void *env, char *data, int size);
-	void nodeLoopOps();
-	int isNullAddress(Address *addr);
-	Address getJoinAddress();
-	void initMemberListTable(Member *memberNode);
-	void printAddress(Address *addr);
-	virtual ~MP1Node();
+    MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
+    Member * getMemberNode() {
+        return memberNode;
+    }
+    int recvLoop();
+    static int enqueueWrapper(void *env, char *buff, int size);
+    void nodeStart(char *servaddrstr, short serverport);
+    int initThisNode(Address *joinaddr);
+    int introduceSelfToGroup(Address *joinAddress);
+    int finishUpThisNode();
+    void nodeLoop();
+    void checkMessages();
+    int getIdFromAddress(string address);
+    short getPortFromAddress(string address);
+
+    bool recvCallBack(void *env, char *data, int size);
+
+    bool joinReqHandler(void *env, char *data, int size);
+    bool joinRepHandler(void *env, char *data, int size);
+
+    bool heartbeatReqHandler(void *env, char *data, int size);
+    bool heartbeatRepHandler(void *env, char *data, int size);
+
+    void updateMembershipList(int id, short port, long heartbeat);
+    void updateMembershipList(MemberListEntry& entry);
+
+    void sendMembershipList(Address *to, enum MsgTypes msgType);
+    bool recvMembershipList(void *env, char *data, int size, const char * label);
+
+    void nodeLoopOps();
+
+    int isNullAddress(Address *addr);
+    Address getJoinAddress();
+    void initMemberListTable(Member *memberNode);
+    void printAddress(Address *addr);
+    virtual ~MP1Node();
 };
 
 #endif /* _MP1NODE_H_ */
