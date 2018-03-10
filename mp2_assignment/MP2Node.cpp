@@ -5,6 +5,7 @@
  **********************************/
 #include "MP2Node.h"
 
+
 /**
  * constructor
  */
@@ -57,6 +58,22 @@ void MP2Node::updateRing() {
 	 * Step 3: Run the stabilization protocol IF REQUIRED
 	 */
 	// Run stabilization protocol if the hash table size is greater than zero and if there has been a changed in the ring
+	//JT TODO
+	//Check for change in ring, run through membership list and check for any change
+	//fail if any not in common
+	//fail if size of the list != size of hashmap
+    
+    if (lastMemList.empty() || lastMemList.size() != curMemList.size()) {
+        stabilizationProtocol();
+    } else {
+        for (int i = 0; i < curMemList.size(); i++) {
+        	if (curMemList[i].getHashCode() != lastMemList[i].getHashCode()) {
+               stabilizationProtocol();
+               break;
+        	}
+        }
+    }
+    lastMemList = curMemList;
 }
 
 /**
